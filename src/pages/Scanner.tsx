@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { useInventory } from '../context/InventoryContext';
 import { Camera, RefreshCw, CheckCircle } from 'lucide-react';
-import { Item } from '../types';
+import type { Item } from '../types';
 
 export const Scanner = () => {
   const { items, updateItemQuantity } = useInventory();
@@ -29,7 +29,7 @@ export const Scanner = () => {
         // Optional: pause scanning after successful scan
         scanner.pause(true);
       },
-      (error) => {
+      (_error) => {
         // Ignored, happens constantly when no barcode is in frame
       }
     );

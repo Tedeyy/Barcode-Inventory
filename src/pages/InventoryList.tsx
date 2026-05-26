@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { Search, Edit2, Trash2, Package } from 'lucide-react';
 

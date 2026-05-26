@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { Item, Category } from '../types';
+import type { Item, Category } from '../types';
 
 interface InventoryContextType {
   items: Item[];

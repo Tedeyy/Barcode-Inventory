@@ -1,4 +1,3 @@
-import React from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { Package, ListOrdered, TrendingUp, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
