@@ -206,6 +206,9 @@ export const InventoryList = () => {
             <Folder size={48} color="var(--accent-gold)" fill="var(--bg-navy-light)" strokeWidth={1.5} />
             <div>
               <div style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{category.name}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                {categories.filter(c => c.parent_id === category.id).length} folders, {items.filter(i => i.category_id === category.id).length} items
+              </div>
               {category.barcode && (
                 <code style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
                   {category.barcode}
