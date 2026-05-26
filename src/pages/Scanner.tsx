@@ -14,10 +14,9 @@ export const Scanner = () => {
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
-    // Initialize scanner
     const scanner = new Html5QrcodeScanner(
       "reader",
-      { fps: 10, qrbox: { width: 300, height: 150 }, supportedScanTypes: [] },
+      { fps: 10, qrbox: { width: 250, height: 150 } },
       /* verbose= */ false
     );
     
@@ -25,31 +24,38 @@ export const Scanner = () => {
 
     scanner.render(
       (decodedText) => {
-        handleScan(decodedText);
-        // Optional: pause scanning after successful scan
-        scanner.pause(true);
+        setScannedBarcode(decodedText);
+        if (scanner.getState() !== 3) { // 3 = PAUSED
+          scanner.pause(true);
+        }
       },
       (_error) => {
-        // Ignored, happens constantly when no barcode is in frame
+        // Ignored
       }
     );
 
     return () => {
-      scanner.clear().catch(error => console.error("Failed to clear scanner", error));
+      try {
+        scanner.clear().catch(error => console.error("Failed to clear scanner", error));
+      } catch (e) {
+        console.error(e);
+      }
     };
-  }, [items]); // Re-initialize if items change so handleScan has fresh closure? Actually, better to use state for scanned items.
+  }, []); // Empty dependency array prevents re-initialization loops
 
-  const handleScan = (barcode: string) => {
-    setScannedBarcode(barcode);
-    const item = items.find(i => i.barcode === barcode);
-    if (item) {
-      setScannedItem(item);
-      setMessage(null);
-    } else {
-      setScannedItem(null);
-      setMessage({ text: 'Item not found in inventory. Please generate it first.', type: 'error' });
+  // React to barcode scans separately from the scanner initialization
+  useEffect(() => {
+    if (scannedBarcode) {
+      const item = items.find(i => i.barcode === scannedBarcode);
+      if (item) {
+        setScannedItem(item);
+        setMessage(null);
+      } else {
+        setScannedItem(null);
+        setMessage({ text: 'Item not found in inventory. Please generate it first.', type: 'error' });
+      }
     }
-  };
+  }, [scannedBarcode, items]);
 
   const resumeScanning = () => {
     setScannedBarcode(null);
@@ -57,7 +63,11 @@ export const Scanner = () => {
     setMessage(null);
     setAddQuantity(1);
     if (scannerRef.current) {
-      scannerRef.current.resume();
+      try {
+        scannerRef.current.resume();
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 
@@ -69,7 +79,6 @@ export const Scanner = () => {
     
     if (success) {
       setMessage({ text: `Successfully updated ${scannedItem.item_name} quantity to ${newQuantity}.`, type: 'success' });
-      // Update local state temporarily to reflect
       setScannedItem({ ...scannedItem, quantity: newQuantity });
       setAddQuantity(1);
     } else {
