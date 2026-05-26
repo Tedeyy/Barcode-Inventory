@@ -3,6 +3,7 @@ import { useInventory } from '../context/InventoryContext';
 import JsBarcode from 'jsbarcode';
 import { useNavigate } from 'react-router-dom';
 import { Save, RefreshCw } from 'lucide-react';
+import { Sidebar } from '../components/Layout/Sidebar';
 
 export const Generator = () => {
   const { addItem, categories } = useInventory();
@@ -73,8 +74,13 @@ export const Generator = () => {
         </div>
       </div>
 
-      <div className="card glass" style={{ padding: '2rem' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+        <div style={{ width: '250px', flexShrink: 0, backgroundColor: 'var(--bg-primary)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
+          <Sidebar />
+        </div>
+
+        <div className="card glass" style={{ flex: 1, padding: '2rem' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
           <div className="grid-2-cols">
             <div>
@@ -168,6 +174,7 @@ export const Generator = () => {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

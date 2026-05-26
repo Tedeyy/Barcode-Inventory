@@ -3,8 +3,6 @@ import { Navbar } from './Navbar';
 import { useAuth } from '../../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-import { Sidebar } from './Sidebar';
-
 export const Layout = () => {
   const { session, loading } = useAuth();
 
@@ -30,12 +28,9 @@ export const Layout = () => {
   return (
     <div className="app-container">
       <Navbar />
-      <div className="app-body">
-        <Sidebar />
-        <main className="main-content">
-          <Outlet />
-        </main>
-      </div>
+      <main className="main-content">
+        <Outlet />
+      </main>
     </div>
   );
 };

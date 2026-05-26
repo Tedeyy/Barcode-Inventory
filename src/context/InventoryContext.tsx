@@ -10,7 +10,7 @@ interface InventoryContextType {
   addItem: (item: Partial<Item>) => Promise<boolean>;
   updateItemQuantity: (id: string, newQuantity: number) => Promise<boolean>;
   deleteItem: (id: string) => Promise<boolean>;
-  addCategory: (name: string) => Promise<boolean>;
+  addCategory: (name: string, parent_id?: string | null) => Promise<boolean>;
 }
 
 const InventoryContext = createContext<InventoryContextType>({
@@ -88,11 +88,11 @@ export const InventoryProvider = ({ children }: { children: React.ReactNode }) =
     return true;
   };
 
-  const addCategory = async (name: string) => {
+  const addCategory = async (name: string, parent_id: string | null = null) => {
     try {
       const { data, error } = await supabase
         .from('categories')
-        .insert([{ name }])
+        .insert([{ name, parent_id }])
         .select()
         .single();
         
