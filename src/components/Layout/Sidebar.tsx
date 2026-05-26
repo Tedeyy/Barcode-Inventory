@@ -7,7 +7,7 @@ interface CategoryTreeItemProps {
   category: Category;
   allCategories: Category[];
   level: number;
-  onSelectCategory?: (id: string) => void;
+  onSelectCategory?: (id: string | null) => void;
   selectedCategoryId?: string | null;
 }
 
@@ -79,7 +79,7 @@ const CategoryTreeItem = ({ category, allCategories, level, onSelectCategory, se
 };
 
 interface SidebarProps {
-  onSelectCategory?: (id: string) => void;
+  onSelectCategory?: (id: string | null) => void;
   selectedCategoryId?: string | null;
 }
 
@@ -155,6 +155,38 @@ export const Sidebar = ({ onSelectCategory, selectedCategoryId }: SidebarProps =
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        {/* Root option */}
+        <div
+          style={{
+            padding: '0.5rem',
+            paddingLeft: '0.5rem',
+            backgroundColor: selectedCategoryId === null || selectedCategoryId === '' ? 'var(--bg-navy-light)' : 'transparent',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.9rem',
+            color: selectedCategoryId === null || selectedCategoryId === '' ? 'var(--accent-gold)' : 'var(--text-primary)',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s',
+            userSelect: 'none',
+            borderBottom: '1px solid var(--border-color)',
+            paddingBottom: '0.75rem',
+            marginBottom: '0.5rem'
+          }}
+          onClick={() => onSelectCategory && onSelectCategory(null)}
+          onMouseOver={(e) => {
+            if (selectedCategoryId !== null && selectedCategoryId !== '') e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
+          }}
+          onMouseOut={(e) => {
+            if (selectedCategoryId !== null && selectedCategoryId !== '') e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
+          <Folder size={14} color="var(--accent-gold)" />
+          Root
+        </div>
+
         {rootCategories.map((cat) => (
           <CategoryTreeItem 
             key={cat.id} 

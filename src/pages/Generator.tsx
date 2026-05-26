@@ -13,7 +13,7 @@ export const Generator = () => {
   const [itemName, setItemName] = useState('');
   const [shortname, setShortname] = useState('');
   const [barcodeValue, setBarcodeValue] = useState('');
-  const [categoryId, setCategoryId] = useState('');
+  const [categoryId, setCategoryId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [description, setDescription] = useState('');
   const [identification, setIdentification] = useState('');
@@ -87,7 +87,7 @@ export const Generator = () => {
     const success = await addItem({
       item_name: itemName,
       barcode: barcodeValue,
-      category_id: categoryId || null,
+      category_id: categoryId,
       quantity: quantity,
       description: description || null,
       identification: identification || null,

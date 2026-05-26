@@ -106,12 +106,12 @@ export const InventoryList = () => {
   const visibleItems = items.filter(item => {
     const matchesSearch = item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           item.barcode.includes(searchTerm);
-    // If searching, we might want to search globally, but for now we search within the folder.
-    // To search globally when searchTerm is active, we can ignore folder filter.
     if (searchTerm) {
       return matchesSearch;
     }
-    return item.category_id === currentFolderId;
+    // Normalize empty string to null so uncategorized items show at root
+    const itemFolder = item.category_id || null;
+    return itemFolder === currentFolderId;
   });
 
   const handleEditClick = (item: any) => {
