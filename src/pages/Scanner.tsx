@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import { useInventory } from '../context/InventoryContext';
 import { Camera, RefreshCw, CheckCircle, Upload, Folder, Package, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -15,34 +15,42 @@ export const Scanner = () => {
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
 
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
 
   useEffect(() => {
     if (!isScanning) return;
-    const scanner = new Html5QrcodeScanner(
-      "reader",
-      { fps: 10, qrbox: { width: 250, height: 150 } },
-      /* verbose= */ false
-    );
+    
+    // Use Html5Qrcode directly instead of the generic Scanner UI
+    const html5QrCode = new Html5Qrcode("reader");
+    scannerRef.current = html5QrCode;
 
-    scannerRef.current = scanner;
-
-    scanner.render(
+    html5QrCode.start(
+      { facingMode: "environment" }, // Prefer back camera
+      {
+        fps: 10,
+        qrbox: { width: 250, height: 150 }
+      },
       (decodedText) => {
         setScannedBarcode(decodedText);
-        if (scanner.getState() !== 3) { // 3 = PAUSED
-          scanner.pause(true);
+        if (html5QrCode.getState() === 2) { // 2 = SCANNING
+          html5QrCode.pause(true);
         }
       },
       (_error) => {
         // Ignored
       }
-    );
+    ).catch(err => {
+      console.error("Error starting camera:", err);
+      setMessage({ text: 'Could not access camera. Please check permissions.', type: 'error' });
+      setIsScanning(false);
+    });
 
     return () => {
       try {
-        if (scannerRef.current) {
-          scannerRef.current.clear().catch(error => console.error("Failed to clear scanner", error));
+        if (scannerRef.current && scannerRef.current.getState() !== 1) { // 1 = NOT_STARTED
+          scannerRef.current.stop().then(() => {
+            scannerRef.current?.clear();
+          }).catch(console.error);
         }
       } catch (e) {
         console.error(e);
