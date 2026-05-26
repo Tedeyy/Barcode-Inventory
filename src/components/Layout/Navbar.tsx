@@ -13,50 +13,32 @@ export const Navbar = () => {
   ];
 
   return (
-    <nav style={{ 
-      backgroundColor: 'var(--bg-navy)', 
-      color: 'var(--text-inverse)', 
-      padding: '1rem 2rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      boxShadow: 'var(--shadow-md)'
-    }}>
+    <nav className="navbar-top">
       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--accent-gold)' }}>
+        <div className="navbar-brand">
           <Barcode size={28} />
           <span style={{ fontSize: '1.25rem', fontWeight: '600', letterSpacing: '0.5px' }}>
             BarcodeSys
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="navbar-links">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
-              style={({ isActive }) => ({
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
-                borderRadius: 'var(--radius-md)',
-                color: isActive ? 'var(--accent-gold)' : 'var(--text-inverse)',
-                backgroundColor: isActive ? 'var(--bg-navy-light)' : 'transparent',
-                transition: 'all 0.2s',
-                fontWeight: '500'
-              })}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             >
               {item.icon}
-              {item.name}
+              <span className="nav-text">{item.name}</span>
             </NavLink>
           ))}
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+      <div className="navbar-actions">
         {profile && (
-          <span style={{ fontSize: '0.875rem', color: 'var(--border-color)' }}>
+          <span className="desktop-only" style={{ fontSize: '0.875rem', color: 'var(--border-color)' }}>
             Welcome, {profile.username || 'User'}
           </span>
         )}
@@ -83,7 +65,7 @@ export const Navbar = () => {
           }}
         >
           <LogOut size={18} />
-          Sign Out
+          <span className="desktop-only">Sign Out</span>
         </button>
       </div>
     </nav>

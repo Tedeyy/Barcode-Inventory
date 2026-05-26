@@ -79,12 +79,13 @@ export const Scanner = () => {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1>Scan Barcode</h1>
+      <div className="dashboard-header">
+        <div>
+          <h1>Scan Barcode</h1>
         <p style={{ color: 'var(--text-secondary)' }}>Scan a barcode to view or update inventory.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1fr)', gap: '2rem' }}>
+      <div className="grid-2-cols">
         
         {/* Scanner Section */}
         <div className="card glass">

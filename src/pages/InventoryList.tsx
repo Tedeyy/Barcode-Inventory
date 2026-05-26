@@ -30,7 +30,7 @@ export const InventoryList = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div className="dashboard-header">
         <div>
           <h1>Inventory List</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Manage your existing inventory.</p>

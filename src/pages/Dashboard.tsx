@@ -24,7 +24,7 @@ export const Dashboard = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div className="dashboard-header">
         <div>
           <h1>Dashboard</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Overview of your barcode inventory system.</p>

@@ -66,15 +66,16 @@ export const Generator = () => {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1>Generate Barcode</h1>
+      <div className="dashboard-header">
+        <div>
+          <h1>Generate Barcode</h1>
         <p style={{ color: 'var(--text-secondary)' }}>Create a new item and generate its 1D barcode.</p>
       </div>
 
       <div className="card glass" style={{ padding: '2rem' }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          <div className="grid-2-cols">
             <div>
               <label className="label" htmlFor="itemName">Item Name</label>
               <input
@@ -104,7 +105,7 @@ export const Generator = () => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          <div className="grid-2-cols">
             <div>
               <label className="label" htmlFor="barcodeValue">Barcode Value</label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
