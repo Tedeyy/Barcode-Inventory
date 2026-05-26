@@ -39,14 +39,9 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-        gap: '1.5rem',
-        marginBottom: '2rem'
-      }}>
+      <div className="stat-grid">
         {statCards.map((stat, idx) => (
-          <div key={idx} className="card" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div key={idx} className="card stat-card" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div>
               <p className="label" style={{ marginBottom: '0.25rem' }}>{stat.title}</p>
               <h2 style={{ fontSize: '2rem', margin: 0, color: 'var(--bg-navy)' }}>{stat.value}</h2>
@@ -79,22 +74,25 @@ export const Dashboard = () => {
             </button>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <table className="dashboard-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-                  <th style={{ padding: '1rem' }}>Item Name</th>
-                  <th style={{ padding: '1rem' }}>Barcode</th>
-                  <th style={{ padding: '1rem' }}>Quantity</th>
-                  <th style={{ padding: '1rem' }}>Added Date</th>
+                  <th className="table-cell">Item Name</th>
+                  <th className="table-cell desktop-only">Barcode</th>
+                  <th className="table-cell">Quantity</th>
+                  <th className="table-cell desktop-only">Added Date</th>
                 </tr>
               </thead>
               <tbody>
                 {items.slice(0, 5).map(item => (
                   <tr key={item.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '1rem', fontWeight: '500' }}>{item.item_name}</td>
-                    <td style={{ padding: '1rem', fontFamily: 'monospace', color: 'var(--text-secondary)' }}>{item.barcode}</td>
-                    <td style={{ padding: '1rem' }}>
+                    <td className="table-cell" style={{ fontWeight: '500' }}>
+                      <div>{item.shortname || item.item_name}</div>
+                      {item.shortname && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{item.item_name}</div>}
+                    </td>
+                    <td className="table-cell desktop-only" style={{ fontFamily: 'monospace', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{item.barcode}</td>
+                    <td className="table-cell">
                       <span style={{ 
                         padding: '0.25rem 0.75rem', 
                         borderRadius: '999px',
@@ -106,7 +104,7 @@ export const Dashboard = () => {
                         {item.quantity}
                       </span>
                     </td>
-                    <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
+                    <td className="table-cell desktop-only" style={{ color: 'var(--text-secondary)' }}>
                       {new Date(item.created_at).toLocaleDateString()}
                     </td>
                   </tr>
