@@ -35,6 +35,9 @@ create table public.items (
   category_id uuid references public.categories(id) on delete set null,
   quantity integer not null default 0,
   created_at timestamptz not null default now()
+  description text,
+  identification varchar,
+  shortname text,
 );
 
 create table public.categories (

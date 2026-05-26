@@ -2,14 +2,16 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { Search, Edit2, Trash2, Package, Folder, ChevronRight, CornerLeftUp, Plus, X, Download } from 'lucide-react';
 import JsBarcode from 'jsbarcode';
+import { useLocation } from 'react-router-dom';
 import type { Category } from '../types';
 
 export const InventoryList = () => {
   const { items, categories, updateItemQuantity, deleteItem, addCategory } = useInventory();
   const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
   
   // File Explorer State
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(location.state?.folderId || null);
   
   // Add Folder State
   const [isAddingFolder, setIsAddingFolder] = useState(false);
@@ -410,8 +412,20 @@ export const InventoryList = () => {
             <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
               <strong>Type:</strong> {selectedEntity.type === 'folder' ? 'Category Folder' : 'Inventory Item'}
               {selectedEntity.type === 'item' && (
-                <div style={{ marginTop: '0.5rem' }}>
-                  <strong>Current Stock:</strong> {selectedEntity.data.quantity}
+                <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div>
+                    <strong>Current Stock:</strong> <span style={{ color: 'var(--text-primary)' }}>{selectedEntity.data.quantity}</span>
+                  </div>
+                  {selectedEntity.data.identification && (
+                    <div>
+                      <strong>Identification:</strong> <span style={{ color: 'var(--text-primary)' }}>{selectedEntity.data.identification}</span>
+                    </div>
+                  )}
+                  {selectedEntity.data.description && (
+                    <div>
+                      <strong>Description:</strong> <span style={{ color: 'var(--text-primary)' }}>{selectedEntity.data.description}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -41,5 +41,8 @@ export interface Item {
   item_name: string;
   category_id: string | null;
   quantity: number;
+  description: string | null;
+  identification: string | null;
+  shortname: string | null;
   created_at: string;
 }

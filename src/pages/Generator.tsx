@@ -11,9 +11,12 @@ export const Generator = () => {
   const barcodeRef = useRef<SVGSVGElement>(null);
 
   const [itemName, setItemName] = useState('');
+  const [shortname, setShortname] = useState('');
   const [barcodeValue, setBarcodeValue] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [description, setDescription] = useState('');
+  const [identification, setIdentification] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Generate a random 12-digit number for UPC-A or just a timestamp based string
@@ -85,7 +88,10 @@ export const Generator = () => {
       item_name: itemName,
       barcode: barcodeValue,
       category_id: categoryId || null,
-      quantity: quantity
+      quantity: quantity,
+      description: description || null,
+      identification: identification || null,
+      shortname: shortname || null
     });
     setLoading(false);
 
@@ -128,6 +134,20 @@ export const Generator = () => {
             </div>
             
             <div>
+              <label className="label" htmlFor="shortname">Short Name (Optional)</label>
+              <input
+                id="shortname"
+                type="text"
+                className="input-field"
+                value={shortname}
+                onChange={(e) => setShortname(e.target.value)}
+                placeholder="e.g. W-Mouse"
+              />
+            </div>
+          </div>
+
+          <div className="grid-2-cols">
+            <div style={{ gridColumn: '1 / -1' }}>
               <label className="label" htmlFor="barcodeValue">Barcode Value</label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
@@ -152,8 +172,9 @@ export const Generator = () => {
             </div>
           </div>
 
-          <div>
-            <label className="label" htmlFor="quantity">Initial Quantity</label>
+          <div className="grid-2-cols" style={{ marginTop: '0.5rem' }}>
+            <div>
+              <label className="label" htmlFor="quantity">Initial Quantity</label>
               <input
                 id="quantity"
                 type="number"
@@ -164,6 +185,32 @@ export const Generator = () => {
                 onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
               />
             </div>
+            
+            <div>
+              <label className="label" htmlFor="identification">Identification (Optional)</label>
+              <input
+                id="identification"
+                type="text"
+                className="input-field"
+                value={identification}
+                onChange={(e) => setIdentification(e.target.value)}
+                placeholder="e.g. Serial Number, MAC"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="label" htmlFor="description">Description (Optional)</label>
+            <textarea
+              id="description"
+              className="input-field"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Additional details..."
+              rows={3}
+              style={{ resize: 'vertical' }}
+            />
+          </div>
 
           <div style={{ 
             marginTop: '1rem', 

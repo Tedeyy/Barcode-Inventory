@@ -1,17 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
 import { useInventory } from '../context/InventoryContext';
-import { Camera, RefreshCw, CheckCircle, Upload } from 'lucide-react';
-import type { Item } from '../types';
+import { Camera, RefreshCw, CheckCircle, Upload, Folder, Package, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import type { Item, Category } from '../types';
 
 export const Scanner = () => {
-  const { items, updateItemQuantity } = useInventory();
+  const { items, categories, updateItemQuantity } = useInventory();
+  const navigate = useNavigate();
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null);
   const [scannedItem, setScannedItem] = useState<Item | null>(null);
+  const [scannedCategory, setScannedCategory] = useState<Category | null>(null);
   const [addQuantity, setAddQuantity] = useState<number>(1);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  
+
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
@@ -21,7 +24,7 @@ export const Scanner = () => {
       { fps: 10, qrbox: { width: 250, height: 150 } },
       /* verbose= */ false
     );
-    
+
     scannerRef.current = scanner;
 
     scanner.render(
@@ -51,19 +54,28 @@ export const Scanner = () => {
   useEffect(() => {
     if (scannedBarcode) {
       const item = items.find(i => i.barcode === scannedBarcode);
+      const category = categories.find(c => c.barcode === scannedBarcode);
+
       if (item) {
         setScannedItem(item);
+        setScannedCategory(null);
+        setMessage(null);
+      } else if (category) {
+        setScannedCategory(category);
+        setScannedItem(null);
         setMessage(null);
       } else {
         setScannedItem(null);
-        setMessage({ text: 'Item not found in inventory. Please generate it first.', type: 'error' });
+        setScannedCategory(null);
+        setMessage({ text: 'Barcode not found in inventory.', type: 'error' });
       }
     }
-  }, [scannedBarcode, items]);
+  }, [scannedBarcode, items, categories]);
 
   const resumeScanning = () => {
     setScannedBarcode(null);
     setScannedItem(null);
+    setScannedCategory(null);
     setMessage(null);
     setAddQuantity(1);
     if (scannerRef.current) {
@@ -92,10 +104,10 @@ export const Scanner = () => {
 
   const handleUpdateQuantity = async () => {
     if (!scannedItem) return;
-    
+
     const newQuantity = scannedItem.quantity + addQuantity;
     const success = await updateItemQuantity(scannedItem.id, newQuantity);
-    
+
     if (success) {
       setMessage({ text: `Successfully updated ${scannedItem.item_name} quantity to ${newQuantity}.`, type: 'success' });
       setScannedItem({ ...scannedItem, quantity: newQuantity });
@@ -115,20 +127,20 @@ export const Scanner = () => {
       </div>
 
       <div className="grid-2-cols">
-        
+
         {/* Scanner Section */}
         <div className="card glass">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--bg-navy)', fontWeight: '600' }}>
             <Camera size={20} />
             <h2>Camera feed</h2>
           </div>
-          
+
           {isScanning ? (
             <div style={{ position: 'relative' }}>
               <div id="reader" style={{ width: '100%', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}></div>
               {!scannedBarcode && (
-                <button 
-                  className="btn-outline" 
+                <button
+                  className="btn-outline"
                   style={{ width: '100%', marginTop: '1rem', color: '#dc2626', borderColor: '#fca5a5' }}
                   onClick={() => setIsScanning(false)}
                 >
@@ -148,7 +160,7 @@ export const Scanner = () => {
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>OR</span>
                 <hr style={{ flex: 1, borderColor: 'var(--border-color)' }} />
               </div>
-              
+
               <label className="btn-outline" style={{ width: '100%', maxWidth: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                 <Upload size={18} />
                 Upload Image
@@ -157,10 +169,10 @@ export const Scanner = () => {
               <div id="reader-hidden" style={{ display: 'none' }}></div>
             </div>
           )}
-          
+
           {scannedBarcode && (
-            <button 
-              className="btn-outline" 
+            <button
+              className="btn-outline"
               style={{ width: '100%', marginTop: '1rem' }}
               onClick={resumeScanning}
             >
@@ -173,7 +185,7 @@ export const Scanner = () => {
         {/* Results Section */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
           <h2 style={{ marginBottom: '1rem' }}>Scan Result</h2>
-          
+
           {!scannedBarcode ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>
               Waiting for barcode scan...
@@ -188,9 +200,9 @@ export const Scanner = () => {
               </div>
 
               {message && (
-                <div style={{ 
-                  padding: '1rem', 
-                  borderRadius: 'var(--radius-md)', 
+                <div style={{
+                  padding: '1rem',
+                  borderRadius: 'var(--radius-md)',
                   marginBottom: '1.5rem',
                   backgroundColor: message.type === 'success' ? '#dcfce7' : '#fee2e2',
                   color: message.type === 'success' ? '#166534' : '#991b1b',
@@ -205,8 +217,26 @@ export const Scanner = () => {
 
               {scannedItem && (
                 <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-                  <h3 style={{ margin: '0 0 1rem' }}>{scannedItem.item_name}</h3>
-                  <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                    <Package size={20} color="var(--accent-gold)" />
+                    <h3 style={{ margin: 0 }}>{scannedItem.item_name}</h3>
+                  </div>
+
+                  {scannedItem.identification && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <span className="label" style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.25rem' }}>Identification</span>
+                      <div style={{ color: 'var(--text-primary)' }}>{scannedItem.identification}</div>
+                    </div>
+                  )}
+
+                  {scannedItem.description && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <span className="label" style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.25rem' }}>Description</span>
+                      <div style={{ color: 'var(--text-primary)' }}>{scannedItem.description}</div>
+                    </div>
+                  )}
+
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', marginTop: '1rem' }}>
                     Current Stock: <strong>{scannedItem.quantity}</strong>
                   </p>
 
@@ -221,13 +251,50 @@ export const Scanner = () => {
                         onChange={(e) => setAddQuantity(parseInt(e.target.value) || 0)}
                       />
                     </div>
-                    <button 
-                      className="btn-primary" 
+                    <button
+                      className="btn-primary"
                       onClick={handleUpdateQuantity}
                     >
                       Update Stock
                     </button>
                   </div>
+                </div>
+              )}
+
+              {scannedCategory && (
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                    <Folder size={20} color="var(--accent-gold)" />
+                    <h3 style={{ margin: 0 }}>{scannedCategory.name}</h3>
+                  </div>
+
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Items in this folder:</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto' }}>
+                      {items.filter(i => i.category_id === scannedCategory.id).length > 0 ? (
+                        items.filter(i => i.category_id === scannedCategory.id).map(item => (
+                          <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
+                            <div>
+                              <span style={{ fontWeight: '500' }}>{item.shortname || item.item_name}</span>
+                              {item.shortname && <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', display: 'block' }}>{item.item_name}</span>}
+                            </div>
+                            <span style={{ color: 'var(--text-secondary)', flexShrink: 0, marginLeft: '0.5rem' }}>Stock: {item.quantity}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Folder is empty.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    className="btn-primary"
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                    onClick={() => navigate('/inventory', { state: { folderId: scannedCategory.id } })}
+                  >
+                    <FileText size={18} />
+                    View Folder
+                  </button>
                 </div>
               )}
             </div>
