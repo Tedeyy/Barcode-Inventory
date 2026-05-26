@@ -10,6 +10,7 @@ interface InventoryContextType {
   addItem: (item: Partial<Item>) => Promise<boolean>;
   updateItemQuantity: (id: string, newQuantity: number) => Promise<boolean>;
   deleteItem: (id: string) => Promise<boolean>;
+  addCategory: (name: string) => Promise<boolean>;
 }
 
 const InventoryContext = createContext<InventoryContextType>({
@@ -20,6 +21,7 @@ const InventoryContext = createContext<InventoryContextType>({
   addItem: async () => false,
   updateItemQuantity: async () => false,
   deleteItem: async () => false,
+  addCategory: async () => false,
 });
 
 export const InventoryProvider = ({ children }: { children: React.ReactNode }) => {
@@ -86,6 +88,27 @@ export const InventoryProvider = ({ children }: { children: React.ReactNode }) =
     return true;
   };
 
+  const addCategory = async (name: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .insert([{ name }])
+        .select()
+        .single();
+        
+      if (error) {
+        console.error('Error adding category:', error);
+        return false;
+      }
+      
+      setCategories(prev => [...prev, data]);
+      return true;
+    } catch (err) {
+      console.error('Error adding category:', err);
+      return false;
+    }
+  };
+
   return (
     <InventoryContext.Provider value={{
       items,
@@ -94,7 +117,8 @@ export const InventoryProvider = ({ children }: { children: React.ReactNode }) =
       refreshItems: fetchData,
       addItem,
       updateItemQuantity,
-      deleteItem
+      deleteItem,
+      addCategory
     }}>
       {children}
     </InventoryContext.Provider>
