@@ -6,7 +6,7 @@ import { Save, RefreshCw } from 'lucide-react';
 import { Sidebar } from '../components/Layout/Sidebar';
 
 export const Generator = () => {
-  const { addItem, categories } = useInventory();
+  const { addItem } = useInventory();
   const navigate = useNavigate();
   const barcodeRef = useRef<SVGSVGElement>(null);
 
@@ -76,7 +76,7 @@ export const Generator = () => {
 
       <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
         <div style={{ width: '250px', flexShrink: 0, backgroundColor: 'var(--bg-primary)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
-          <Sidebar />
+          <Sidebar onSelectCategory={setCategoryId} selectedCategoryId={categoryId} />
         </div>
 
         <div className="card glass" style={{ flex: 1, padding: '2rem' }}>
@@ -96,23 +96,6 @@ export const Generator = () => {
               />
             </div>
             
-            <div>
-              <label className="label" htmlFor="category">Category</label>
-              <select
-                id="category"
-                className="input-field"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-              >
-                <option value="">Select a category...</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid-2-cols">
             <div>
               <label className="label" htmlFor="barcodeValue">Barcode Value</label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -136,9 +119,10 @@ export const Generator = () => {
                 </button>
               </div>
             </div>
+          </div>
 
-            <div>
-              <label className="label" htmlFor="quantity">Initial Quantity</label>
+          <div>
+            <label className="label" htmlFor="quantity">Initial Quantity</label>
               <input
                 id="quantity"
                 type="number"
@@ -149,7 +133,6 @@ export const Generator = () => {
                 onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
               />
             </div>
-          </div>
 
           <div style={{ 
             marginTop: '1rem', 

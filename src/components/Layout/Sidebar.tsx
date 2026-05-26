@@ -3,7 +3,15 @@ import { useInventory } from '../../context/InventoryContext';
 import { Folder, Plus, Save, X, ChevronRight, ChevronDown } from 'lucide-react';
 import type { Category } from '../../types';
 
-const CategoryTreeItem = ({ category, allCategories, level }: { category: Category, allCategories: Category[], level: number }) => {
+interface CategoryTreeItemProps {
+  category: Category;
+  allCategories: Category[];
+  level: number;
+  onSelectCategory?: (id: string) => void;
+  selectedCategoryId?: string | null;
+}
+
+const CategoryTreeItem = ({ category, allCategories, level, onSelectCategory, selectedCategoryId }: CategoryTreeItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const children = allCategories.filter(c => c.parent_id === category.id);
   const hasChildren = children.length > 0;
@@ -14,7 +22,7 @@ const CategoryTreeItem = ({ category, allCategories, level }: { category: Catego
         style={{ 
           padding: '0.5rem', 
           paddingLeft: `${level * 1.25 + 0.5}rem`,
-          backgroundColor: 'transparent',
+          backgroundColor: selectedCategoryId === category.id ? 'var(--bg-navy-light)' : 'transparent',
           borderRadius: 'var(--radius-md)',
           fontSize: '0.9rem',
           color: 'var(--text-primary)',
@@ -26,9 +34,20 @@ const CategoryTreeItem = ({ category, allCategories, level }: { category: Catego
           transition: 'background-color 0.2s',
           userSelect: 'none'
         }}
-        onClick={() => hasChildren && setIsExpanded(!isExpanded)}
-        onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
-        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+        onClick={() => {
+          if (hasChildren) setIsExpanded(!isExpanded);
+          if (onSelectCategory) onSelectCategory(category.id);
+        }}
+        onMouseOver={(e) => {
+          if (selectedCategoryId !== category.id) {
+            e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
+          }
+        }}
+        onMouseOut={(e) => {
+          if (selectedCategoryId !== category.id) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }
+        }}
       >
         <div style={{ width: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {hasChildren ? (
@@ -44,7 +63,14 @@ const CategoryTreeItem = ({ category, allCategories, level }: { category: Catego
       {isExpanded && hasChildren && (
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: '0.1rem' }}>
           {children.map(child => (
-            <CategoryTreeItem key={child.id} category={child} allCategories={allCategories} level={level + 1} />
+            <CategoryTreeItem 
+              key={child.id} 
+              category={child} 
+              allCategories={allCategories} 
+              level={level + 1} 
+              onSelectCategory={onSelectCategory}
+              selectedCategoryId={selectedCategoryId}
+            />
           ))}
         </div>
       )}
@@ -52,7 +78,12 @@ const CategoryTreeItem = ({ category, allCategories, level }: { category: Catego
   );
 };
 
-export const Sidebar = () => {
+interface SidebarProps {
+  onSelectCategory?: (id: string) => void;
+  selectedCategoryId?: string | null;
+}
+
+export const Sidebar = ({ onSelectCategory, selectedCategoryId }: SidebarProps = {}) => {
   const { categories, addCategory } = useInventory();
   const [isAdding, setIsAdding] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -125,7 +156,14 @@ export const Sidebar = () => {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
         {rootCategories.map((cat) => (
-          <CategoryTreeItem key={cat.id} category={cat} allCategories={categories} level={0} />
+          <CategoryTreeItem 
+            key={cat.id} 
+            category={cat} 
+            allCategories={categories} 
+            level={0} 
+            onSelectCategory={onSelectCategory}
+            selectedCategoryId={selectedCategoryId}
+          />
         ))}
         {categories.length === 0 && !isAdding && (
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>
