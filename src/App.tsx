@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { InventoryProvider } from './context/InventoryContext';
@@ -36,6 +37,7 @@ function App() {
       <AuthProvider>
         <InventoryProvider>
           <AppRoutes />
+          <Analytics />
         </InventoryProvider>
       </AuthProvider>
     </Router>
