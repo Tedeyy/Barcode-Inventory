@@ -90,9 +90,13 @@ export const InventoryProvider = ({ children }: { children: React.ReactNode }) =
 
   const addCategory = async (name: string, parent_id: string | null = null) => {
     try {
+      const timestamp = Date.now().toString().slice(-8);
+      const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      const barcode = `C${timestamp}${randomPart}`;
+
       const { data, error } = await supabase
         .from('categories')
-        .insert([{ name, parent_id }])
+        .insert([{ name, parent_id, barcode }])
         .select()
         .single();
         

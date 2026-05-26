@@ -204,7 +204,14 @@ export const InventoryList = () => {
             }}
           >
             <Folder size={48} color="var(--accent-gold)" fill="var(--bg-navy-light)" strokeWidth={1.5} />
-            <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{category.name}</span>
+            <div>
+              <div style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{category.name}</div>
+              {category.barcode && (
+                <code style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                  {category.barcode}
+                </code>
+              )}
+            </div>
           </div>
         ))}
 
