@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import JsBarcode from 'jsbarcode';
 import { useNavigate } from 'react-router-dom';
-import { Save, RefreshCw } from 'lucide-react';
+import { Save, RefreshCw, Download } from 'lucide-react';
 import { Sidebar } from '../components/Layout/Sidebar';
 
 export const Generator = () => {
@@ -45,6 +45,37 @@ export const Generator = () => {
     }
   }, [barcodeValue]);
 
+  const downloadBarcode = () => {
+    const svg = barcodeRef.current;
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    // Set SVG attributes for proper sizing on canvas
+    const svgSize = svg.getBoundingClientRect();
+    canvas.width = svgSize.width;
+    canvas.height = svgSize.height;
+
+    img.onload = () => {
+      if (ctx) {
+        ctx.fillStyle = 'white'; // white background
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        
+        const pngFile = canvas.toDataURL('image/png');
+        const downloadLink = document.createElement('a');
+        downloadLink.download = `barcode-${barcodeValue}.png`;
+        downloadLink.href = pngFile;
+        downloadLink.click();
+      }
+    };
+
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!itemName || !barcodeValue) return;
@@ -74,8 +105,8 @@ export const Generator = () => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-        <div style={{ width: '250px', flexShrink: 0, backgroundColor: 'var(--bg-primary)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
+      <div className="generator-layout">
+        <div className="generator-sidebar-container">
           <Sidebar onSelectCategory={setCategoryId} selectedCategoryId={categoryId} />
         </div>
 
@@ -148,8 +179,9 @@ export const Generator = () => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-            <button type="button" className="btn-outline" onClick={() => navigate(-1)}>
-              Cancel
+            <button type="button" className="btn-outline" onClick={downloadBarcode}>
+              <Download size={18} />
+              Save as PNG
             </button>
             <button type="submit" className="btn-primary" disabled={loading}>
               <Save size={18} />
