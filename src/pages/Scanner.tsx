@@ -36,7 +36,9 @@ export const Scanner = () => {
 
     return () => {
       try {
-        scanner.clear().catch(error => console.error("Failed to clear scanner", error));
+        if (scannerRef.current) {
+          scannerRef.current.clear().catch(error => console.error("Failed to clear scanner", error));
+        }
       } catch (e) {
         console.error(e);
       }

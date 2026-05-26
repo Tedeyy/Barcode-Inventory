@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useInventory } from '../context/InventoryContext';
-import { Search, Edit2, Trash2, Package, Folder, ChevronRight, CornerLeftUp, Plus } from 'lucide-react';
+import { Search, Edit2, Trash2, Package, Folder, ChevronRight, CornerLeftUp, Plus, X, Download } from 'lucide-react';
+import JsBarcode from 'jsbarcode';
 import type { Category } from '../types';
 
 export const InventoryList = () => {
@@ -17,6 +18,62 @@ export const InventoryList = () => {
   // Editing Item State
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(0);
+
+  // Properties Pane State
+  const [selectedEntity, setSelectedEntity] = useState<{ type: 'folder' | 'item', data: any } | null>(null);
+  const folderClickTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleFolderClick = (category: Category) => {
+    if (folderClickTimeout.current) {
+      clearTimeout(folderClickTimeout.current);
+      folderClickTimeout.current = null;
+      setSelectedEntity({ type: 'folder', data: category });
+    } else {
+      folderClickTimeout.current = setTimeout(() => {
+        setCurrentFolderId(category.id);
+        folderClickTimeout.current = null;
+      }, 250);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedEntity && selectedEntity.data.barcode) {
+      try {
+        JsBarcode('#details-barcode-svg', selectedEntity.data.barcode, {
+          format: 'CODE128',
+          lineColor: 'var(--text-primary)',
+          width: 2,
+          height: 100,
+          displayValue: true
+        });
+      } catch (e) { console.error(e) }
+    }
+  }, [selectedEntity]);
+
+  const downloadBarcode = () => {
+    if (!selectedEntity) return;
+    const svg = document.getElementById('details-barcode-svg');
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    const svgSize = svg.getBoundingClientRect();
+    canvas.width = svgSize.width || 200;
+    canvas.height = svgSize.height || 100;
+    img.onload = () => {
+      if (ctx) {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        const link = document.createElement('a');
+        link.download = `${selectedEntity.data.name || selectedEntity.data.item_name}-barcode.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+  };
 
   // Compute Breadcrumbs
   const breadcrumbs = useMemo(() => {
@@ -191,9 +248,10 @@ export const InventoryList = () => {
               padding: '2rem 1rem',
               textAlign: 'center',
               transition: 'transform 0.2s, box-shadow 0.2s',
-              gap: '1rem'
+              gap: '1rem',
+              userSelect: 'none'
             }}
-            onClick={() => setCurrentFolderId(category.id)}
+            onClick={() => handleFolderClick(category)}
             onMouseOver={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)';
               e.currentTarget.style.boxShadow = 'var(--shadow-md)';
@@ -223,12 +281,14 @@ export const InventoryList = () => {
           <div 
             key={item.id} 
             className="card"
+            onDoubleClick={() => setSelectedEntity({ type: 'item', data: item })}
             style={{ 
               display: 'flex', 
               flexDirection: 'column', 
               position: 'relative',
               padding: '1.5rem',
-              gap: '1rem'
+              gap: '1rem',
+              userSelect: 'none'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
@@ -315,6 +375,49 @@ export const InventoryList = () => {
           </div>
         )}
       </div>
+
+      {selectedEntity && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+        }} onClick={() => setSelectedEntity(null)}>
+          <div className="card glass" style={{ width: '100%', maxWidth: '400px', padding: '2rem' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)' }}>
+                {selectedEntity.type === 'folder' ? selectedEntity.data.name : selectedEntity.data.item_name}
+              </h2>
+              <button className="btn-outline" style={{ border: 'none', padding: '0.25rem' }} onClick={() => setSelectedEntity(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              {selectedEntity.data.barcode ? (
+                <>
+                  <div style={{ backgroundColor: 'var(--bg-primary)', padding: '1.5rem', borderRadius: 'var(--radius-md)', display: 'inline-block' }}>
+                    <svg id="details-barcode-svg"></svg>
+                  </div>
+                  <button className="btn-primary" style={{ width: '100%', marginTop: '1.5rem' }} onClick={downloadBarcode}>
+                    <Download size={18} />
+                    Save as PNG
+                  </button>
+                </>
+              ) : (
+                <div style={{ color: 'var(--text-secondary)' }}>No barcode assigned</div>
+              )}
+            </div>
+            
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              <strong>Type:</strong> {selectedEntity.type === 'folder' ? 'Category Folder' : 'Inventory Item'}
+              {selectedEntity.type === 'item' && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <strong>Current Stock:</strong> {selectedEntity.data.quantity}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
