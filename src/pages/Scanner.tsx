@@ -82,7 +82,8 @@ export const Scanner = () => {
       <div className="dashboard-header">
         <div>
           <h1>Scan Barcode</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Scan a barcode to view or update inventory.</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Scan a barcode to view or update inventory.</p>
+        </div>
       </div>
 
       <div className="grid-2-cols">

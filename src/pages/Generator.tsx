@@ -69,7 +69,8 @@ export const Generator = () => {
       <div className="dashboard-header">
         <div>
           <h1>Generate Barcode</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Create a new item and generate its 1D barcode.</p>
+          <p style={{ color: 'var(--text-secondary)' }}>Create a new item and generate its 1D barcode.</p>
+        </div>
       </div>
 
       <div className="card glass" style={{ padding: '2rem' }}>
