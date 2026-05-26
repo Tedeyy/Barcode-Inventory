@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
 import { useInventory } from '../context/InventoryContext';
-import { Camera, RefreshCw, CheckCircle } from 'lucide-react';
+import { Camera, RefreshCw, CheckCircle, Upload } from 'lucide-react';
 import type { Item } from '../types';
 
 export const Scanner = () => {
@@ -10,10 +10,12 @@ export const Scanner = () => {
   const [scannedItem, setScannedItem] = useState<Item | null>(null);
   const [addQuantity, setAddQuantity] = useState<number>(1);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
   
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
+    if (!isScanning) return;
     const scanner = new Html5QrcodeScanner(
       "reader",
       { fps: 10, qrbox: { width: 250, height: 150 } },
@@ -43,7 +45,7 @@ export const Scanner = () => {
         console.error(e);
       }
     };
-  }, []); // Empty dependency array prevents re-initialization loops
+  }, [isScanning]); // Re-initialize only when isScanning changes
 
   // React to barcode scans separately from the scanner initialization
   useEffect(() => {
@@ -69,6 +71,21 @@ export const Scanner = () => {
         scannerRef.current.resume();
       } catch (e) {
         console.error(e);
+      }
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      try {
+        const html5QrCode = new Html5Qrcode("reader-hidden");
+        const decodedText = await html5QrCode.scanFile(file, false);
+        setScannedBarcode(decodedText);
+        html5QrCode.clear();
+      } catch (err) {
+        console.error(err);
+        setMessage({ text: 'No barcode found in this image.', type: 'error' });
       }
     }
   };
@@ -106,7 +123,40 @@ export const Scanner = () => {
             <h2>Camera feed</h2>
           </div>
           
-          <div id="reader" style={{ width: '100%', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}></div>
+          {isScanning ? (
+            <div style={{ position: 'relative' }}>
+              <div id="reader" style={{ width: '100%', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}></div>
+              {!scannedBarcode && (
+                <button 
+                  className="btn-outline" 
+                  style={{ width: '100%', marginTop: '1rem', color: '#dc2626', borderColor: '#fca5a5' }}
+                  onClick={() => setIsScanning(false)}
+                >
+                  Close Camera
+                </button>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+              <Camera size={48} color="var(--text-secondary)" style={{ marginBottom: '1rem' }} />
+              <button className="btn-primary" onClick={() => setIsScanning(true)} style={{ width: '100%', maxWidth: '200px' }}>
+                Start Camera
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '1.5rem 0', width: '100%', maxWidth: '200px' }}>
+                <hr style={{ flex: 1, borderColor: 'var(--border-color)' }} />
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>OR</span>
+                <hr style={{ flex: 1, borderColor: 'var(--border-color)' }} />
+              </div>
+              
+              <label className="btn-outline" style={{ width: '100%', maxWidth: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <Upload size={18} />
+                Upload Image
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload} />
+              </label>
+              <div id="reader-hidden" style={{ display: 'none' }}></div>
+            </div>
+          )}
           
           {scannedBarcode && (
             <button 
